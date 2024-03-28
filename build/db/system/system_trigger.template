@@ -1,0 +1,20 @@
+drop trigger if exists ${triggerName} on "${tableName}";
+
+drop function if exists ${triggerName};
+
+create or replace function ${triggerName}()
+returns trigger as $${triggerName}$
+begin
+  if TG_OP = 'INSERT' then
+    new.createdate := current_timestamp;
+    new.createby := get_user_id();
+  end if;
+  new.updatedate := current_timestamp;
+  new.updateby := get_user_id();
+  return new;
+end;
+$${triggerName}$ language plpgsql;
+
+create trigger ${triggerName} before insert or update
+ on "${tableName}"
+ for each row execute procedure ${triggerName}();

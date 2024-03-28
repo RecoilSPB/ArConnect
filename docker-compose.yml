@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  postgres:
+    build: .
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - /mnt/backup/stage_${STAGE}:/var/lib/postgresql/data
+      - ./build/db/:/db/
+      #      - ./build/init:/docker-entrypoint-initdb.d
+    networks:
+      - postgres_network
+
+  backend_app:
+    build:
+      context: ./
+      dockerfile: DockerfilePlatform
+    restart: always
+    ports:
+      - "${PLATFORM_PORT}:8080"
+    volumes:
+      - ./build/Tomcat9/ariadna-connect/:/ariadna-connect/
+    networks:
+      - postgres_network
+
+volumes:
+  postgres_data:
+
+networks:
+  postgres_network:
